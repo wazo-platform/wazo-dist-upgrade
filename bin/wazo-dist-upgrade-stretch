@@ -150,7 +150,7 @@ append_log()
 
 usage() {
     cat <<-EOF
-	usage: wazo-upgrade [-d] [-f] [-h]
+	usage: wazo-dist-upgrade [-d] [-f] [-h]
 	    -d: only download packages
 	    -f: force yes
 	    -h: print usage
