@@ -10,3 +10,5 @@ Architecture: all
 Depends: ${misc:Depends}
 Description: Wazo Debian distribution upgrade tools
  This package provide Wazo upgrading tools for the Debian distribution
+Breaks: xivo-upgrade (<< 19.13~20190911.205217.f888b81.deb9)
+Replaces: xivo-upgrade (<< 19.13~20190911.205217.f888b81.deb9)
