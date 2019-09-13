@@ -103,6 +103,7 @@ dist_upgrade() {
 
     apt-get install --yes -o Dpkg::Options::="--force-confnew" wazo-dist
     apt-get install --yes -o Dpkg::Options::="--force-confnew" xivo-dbms  # Handle PostgreSQL cluster upgrade
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" rabbitmq-server
     apt-get upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get dist-upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get autoremove --yes
