@@ -113,7 +113,9 @@ dist_upgrade() {
 
     differed_action pre-start
     wazo-service enable
+    update-alternatives --set iptables /usr/sbin/iptables-legacy
     wazo-service restart
+    update-alternatives --set iptables /usr/sbin/iptables-nft
     differed_action post-start
     apt-get purge --yes xivo-dist
 }
