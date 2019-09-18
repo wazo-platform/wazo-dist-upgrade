@@ -68,7 +68,7 @@ remove_ansible_default_config_dropins() {
         rm -f /etc/asterisk/extensions.d/engine-api.conf
     fi
     if [ "$(sha256sum /etc/asterisk/manager.d/999-engine-api.conf | awk '{print $1}')" = \
-         "21993aadb883c5720f990c4f61c2c5be74cf84083d27d63ac3b87d9c7604eefc" ] ; then
+         "d599705970399b9eda077336a161f8b63a0688e9bfc5875f4481797328ffdca5" ] ; then
         rm -f /etc/asterisk/manager.d/999-engine-api.conf
     fi
     if [ "$(sha256sum /etc/asterisk/http.d/10-engine-api.conf | awk '{print $1}')" = \
@@ -88,7 +88,7 @@ remove_ansible_default_config_dropins() {
         rm -f /etc/wazo-calld/conf.d/50-engine-api.yml
     fi
     if [ "$(sha256sum /etc/wazo-amid/conf.d/50-engine-api.yml | awk '{print $1}')" = \
-         "bb60ce366a36438575d0edd0ac03be261866150267501dd2a86eb67777ab4e50" ] ; then
+         "44533554535a896b63e4102424b49ca3918c2fcac574ee352c0f73353473e8e7" ] ; then
         rm -f /etc/wazo-amid/conf.d/50-engine-api.yml
     fi
     if [ "$(sha256sum /etc/wazo-confd/conf.d/50-engine-api.yml | awk '{print $1}')" = \
