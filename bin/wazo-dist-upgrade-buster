@@ -87,9 +87,9 @@ remove_ansible_default_config_dropins() {
          "c01f128da92ba1625dc9dc87684d6fc1b9e24f30dcef0be177718a87a0574ed2" ] ; then
         rm -f /etc/wazo-calld/conf.d/50-engine-api.yml
     fi
-    if [ "$(sha256sum /etc/wazo-amid/conf.d/50-engine-api.yml | awk '{print $1}')" = \
+    if [ "$(sha256sum /etc/xivo-amid/conf.d/50-engine-api.yml | awk '{print $1}')" = \
          "44533554535a896b63e4102424b49ca3918c2fcac574ee352c0f73353473e8e7" ] ; then
-        rm -f /etc/wazo-amid/conf.d/50-engine-api.yml
+        rm -f /etc/xivo-amid/conf.d/50-engine-api.yml
     fi
     if [ "$(sha256sum /etc/wazo-confd/conf.d/50-engine-api.yml | awk '{print $1}')" = \
          "5ba68f5026f1cf13320a177ea795fa90936e10efa0c5796af5bb7ed7f0891f9d" ] ; then
