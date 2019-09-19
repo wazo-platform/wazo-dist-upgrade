@@ -164,13 +164,13 @@ dist_upgrade() {
     apt-get install --yes -o Dpkg::Options::="--force-confnew" wazo-dist
     apt-get install --yes -o Dpkg::Options::="--force-confnew" xivo-dbms  # Handle PostgreSQL cluster upgrade
     apt-get install --yes -o Dpkg::Options::="--force-confnew" systemd systemd-sysv  # Fix rabbitmq-server.service obscure bug
+    migrate_systemd_system_conf
     apt-get install --yes -o Dpkg::Options::="--force-confnew" rabbitmq-server
     prepare_consul_upgrade
     apt-get upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get dist-upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get autoremove --yes
 
-    migrate_systemd_system_conf
     upgrade_dahdi_linux_modules
 
     differed_action pre-start
