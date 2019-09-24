@@ -103,6 +103,7 @@ dist_upgrade() {
 
     apt-get install --yes -o Dpkg::Options::="--force-confnew" xivo-certs xivo-config
     systemctl restart consul
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" wazo-platform
     apt-get upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get dist-upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get autoremove --yes
