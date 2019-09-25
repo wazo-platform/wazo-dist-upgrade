@@ -26,7 +26,7 @@ wazo_version_installed() {
 }
 
 wazo_version_candidate() {
-    echo "$(LANG='C' apt-cache policy xivo | grep Candidate | grep -oE '[0-9]{2}\.[0-9]+(\.[0-9]+)?' | head -n1)"
+    echo "$(LANG='C' apt-cache policy wazo-platform | grep Candidate | grep -oE '[0-9]{2}\.[0-9]+(\.[0-9]+)?' | head -n1)"
 }
 
 display_upgrade_notice() {
@@ -56,7 +56,8 @@ differed_action() {
     echo "Executing $state upgrade action..."
     export XIVO_VERSION_INSTALLED=17.17
     shopt -qs nullglob  # avoid warning when action directory has no scripts
-    for script in /usr/share/wazo-dist-upgrade/$state.d/* ; do
+    for script in /usr/share/xivo-upgrade/$state.d/* ; do
+        echo "Executing upgrade script $script..."
         $script
     done
     shopt -qu nullglob
@@ -89,20 +90,23 @@ change_sources_list() {
 }
 
 dist_upgrade() {
-    differed_action pre-stop
-    wazo-service stop
-    wazo-service disable
-    differed_action post-stop
-
     apt-get update -qq
     apt-get install --yes -o Dpkg::Options::="--force-confnew" xivo-dist
 
     xivo-dist ${wazo_distribution}
     change_sources_list 'jessie' 'stretch'
+
     apt-get update -qq
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" xivo-upgrade
+
+    differed_action pre-stop
+    wazo-service stop
+    wazo-service disable
+    differed_action post-stop
 
     apt-get install --yes -o Dpkg::Options::="--force-confnew" xivo-certs xivo-config
     systemctl restart consul
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" wazo-platform
     apt-get upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get dist-upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get autoremove --yes
