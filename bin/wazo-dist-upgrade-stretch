@@ -91,16 +91,18 @@ change_sources_list() {
 
 dist_upgrade() {
     apt-get update -qq
-    apt-get install --yes -o Dpkg::Options::="--force-confnew" xivo-dist xivo-upgrade
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" xivo-dist
+
+    xivo-dist ${wazo_distribution}
+    change_sources_list 'jessie' 'stretch'
+
+    apt-get update -qq
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" xivo-upgrade
 
     differed_action pre-stop
     wazo-service stop
     wazo-service disable
     differed_action post-stop
-
-    xivo-dist ${wazo_distribution}
-    change_sources_list 'jessie' 'stretch'
-    apt-get update -qq
 
     apt-get install --yes -o Dpkg::Options::="--force-confnew" xivo-certs xivo-config
     systemctl restart consul
