@@ -56,7 +56,8 @@ differed_action() {
     echo "Executing $state upgrade action..."
     export XIVO_VERSION_INSTALLED=17.17
     shopt -qs nullglob  # avoid warning when action directory has no scripts
-    for script in /usr/share/wazo-dist-upgrade/$state.d/* ; do
+    for script in /usr/share/xivo-upgrade/$state.d/* ; do
+        echo "Executing upgrade script $script..."
         $script
     done
     shopt -qu nullglob
