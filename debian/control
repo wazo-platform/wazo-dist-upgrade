@@ -1,13 +1,13 @@
 Source: wazo-dist-upgrade
 Section: admin
-Priority: extra
+Priority: optional
 Maintainer: Wazo Maintainers <dev@wazo.community>
 Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.6
 
 Package: wazo-dist-upgrade
 Architecture: all
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, python3
 Description: Wazo Debian distribution upgrade tools
  This package provide Wazo upgrading tools for the Debian distribution
 Breaks: xivo-upgrade (<< 19.13~20190911.205217.f888b81.deb9)
