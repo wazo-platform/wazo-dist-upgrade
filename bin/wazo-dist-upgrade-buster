@@ -147,12 +147,12 @@ migrate_systemd_system_conf() {
     fi
 }
 
-is_installable() {
-    dpkg-query --show "$1" > /dev/null 2>&1
+is_available() {
+    apt-cache show "$1" > /dev/null 2>&1
 }
 
 apt_get_install_wazo_dbms() {
-    if is_installable wazo-dbms; then
+    if is_available wazo-dbms; then
         apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends wazo-dbms
     else
         apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends xivo-dbms
