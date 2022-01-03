@@ -151,19 +151,11 @@ is_available() {
     apt-cache show "$1" > /dev/null 2>&1
 }
 
-apt_get_install_wazo_dbms() {
+find_wazo_dbms_package() {
     if is_available wazo-dbms; then
-        apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends wazo-dbms
+        echo wazo-dbms
     else
-        apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends xivo-dbms
-    fi
-}
-
-apt_mark_auto_wazo_dbms() {
-    if is_available wazo-dbms; then
-        apt-mark auto wazo-dbms
-    else
-        apt-mark auto xivo-dbms
+        echo xivo-dbms
     fi
 }
 
@@ -181,13 +173,14 @@ dist_upgrade() {
     change_sources_list 'stretch' 'buster'
     apt-get update -qq
 
+    wazo_dbms_package=$(find_wazo_dbms_package)
     apt-get install --yes -o Dpkg::Options::="--force-confnew" wazo-dist
-    apt_get_install_wazo_dbms # Handle PostgreSQL cluster upgrade
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends $wazo_dbms_package  # Handle PostgreSQL cluster upgrade
     apt-get install --yes -o Dpkg::Options::="--force-confnew" systemd systemd-sysv  # Fix rabbitmq-server.service obscure bug
     migrate_systemd_system_conf
     apt-get install --yes -o Dpkg::Options::="--force-confnew" rabbitmq-server
     apt-mark auto systemd systemd-sysv rabbitmq-server
-    apt_mark_auto_wazo_dbms
+    apt-mark auto $wazo_dbms_package
     prepare_consul_upgrade
     apt-get upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get dist-upgrade --yes -o Dpkg::Options::="--force-confnew"
