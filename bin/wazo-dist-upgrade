@@ -6,16 +6,11 @@ debian_version_installed() {
     cut -f1 -d. /etc/debian_version
 }
 
-is_jessie() {
-    [ $(debian_version_installed) -eq 8 ]
-}
 is_stretch() {
     [ $(debian_version_installed) -eq 9 ]
 }
 
-if is_jessie; then
-    wazo-dist-upgrade-stretch $@
-elif is_stretch; then
+if is_stretch; then
     wazo-dist-upgrade-buster $@
 else
     echo "Debian version '$(debian_version_installed)' is not supported"
