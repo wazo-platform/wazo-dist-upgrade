@@ -18,3 +18,9 @@ Debian distribution utility for Wazo
 
 - `/usr/bin/wazo-dist-upgrade` must be Python/Bash compatible with Jessie,
   Stretch and Buster
+
+## Content
+
+- `wazo-dist-upgrade`: Wrapper to execute upgrade script according the Debian version
+- `wazo-dist-upgrade-<debian>`: Specific upgrade procedure for a Debian version
+- `wazo-dist-upgrade-<debian>-check`: Do various check before upgrade (wazo, debian, etc..)
