@@ -85,15 +85,15 @@ def parse_args():
 
 def check_running_kernel_is_up_to_date():
     running_kernel = LooseVersion(platform.release())
-    minimum_kernel = LooseVersion('4.9.0')
+    minimum_kernel = LooseVersion('4.19.0')
 
     if running_kernel < minimum_kernel:
         raise WrongKernelVersion(minimum_kernel, running_kernel)
 
 
 def check_wazo_version():
-    # 19.12 = latest prod version, 19.13 = latest dev version
-    if installed_wazo_version() not in ('19.12', '19.13'):
+    # 23.05 = latest prod version, 23.06 = latest dev version
+    if installed_wazo_version() not in ('23.05', '23.06'):
         raise WrongWazoVersion(installed_wazo_version())
 
 
