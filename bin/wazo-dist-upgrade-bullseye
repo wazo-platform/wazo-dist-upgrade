@@ -9,14 +9,14 @@ export APT_LISTCHANGES_FRONTEND=none
 fetch_wazo_versions() {
     echo "Fetching Wazo versions..."
     apt-get update -qq
-    apt-get install -qq --yes -o Dpkg::Options::="--force-confnew" xivo-dist
+    apt-get install -qq --yes -o Dpkg::Options::="--force-confnew" wazo-dist
     trap : SIGINT
-    cp /etc/apt/sources.list.d/xivo-dist.list{,.bak}
+    cp /etc/apt/sources.list.d/wazo-dist.list{,.bak}
     wazo-dist -m ${wazo_distribution}
     apt-get update -qq
     wazo_version_installed=$(wazo_version_installed)
     wazo_version_candidate=$(wazo_version_candidate)
-    mv /etc/apt/sources.list.d/xivo-dist.list{.bak,}
+    mv /etc/apt/sources.list.d/wazo-dist.list{.bak,}
     trap - SIGINT
     apt-get update -qq
 }
@@ -55,70 +55,11 @@ differed_action() {
     local state=$1
     export XIVO_VERSION_INSTALLED=19.12
     shopt -qs nullglob  # avoid warning when action directory has no scripts
-    for script in /usr/share/{xivo,wazo}-upgrade/$state.d/* ; do
+    for script in /usr/share/wazo-upgrade/$state.d/* ; do
 		    echo "Executing upgrade script $script..."
         $script
     done
     shopt -qu nullglob
-}
-
-remove_ansible_default_config_dropins() {
-    if [ "$(sha256sum /etc/asterisk/extensions.d/engine-api.conf | awk '{print $1}')" = \
-         "b119bc7d71316f10b72fcfb966d4520dc4636c1d789e9474033c07e49c546169" ] ; then
-        rm -f /etc/asterisk/extensions.d/engine-api.conf
-    fi
-    if [ "$(sha256sum /etc/asterisk/manager.d/999-engine-api.conf | awk '{print $1}')" = \
-         "d599705970399b9eda077336a161f8b63a0688e9bfc5875f4481797328ffdca5" ] ; then
-        rm -f /etc/asterisk/manager.d/999-engine-api.conf
-    fi
-    if [ "$(sha256sum /etc/asterisk/http.d/10-engine-api.conf | awk '{print $1}')" = \
-         "3878f7df60ecfceda4ee81a5e95ab90a3cb31c752cd06ad8f58707bff3193535" ] ; then
-        rm -f /etc/asterisk/http.d/10-engine-api.conf
-    fi
-    if [ "$(sha256sum /etc/xivo-confgend-client/config.conf | awk '{print $1}')" = \
-         "2b5ecef2396032060abc0000c857b70e3366e3a006edab1197284ba6641be2f4" ] ; then
-        rm -f /etc/xivo-confgend-client/config.conf
-    fi
-    if [ "$(sha256sum /etc/systemd/system/xivo-sysconfd.service.d/b2bua.conf | awk '{print $1}')" = \
-         "8b0693af08657aee491364dcb7618e0849e2ba18ea8344d79ec2228a81d21302" ] ; then
-        rm -f /etc/systemd/system/xivo-sysconfd.service.d/b2bua.conf
-    fi
-    if [ "$(sha256sum /etc/wazo-calld/conf.d/50-engine-api.yml | awk '{print $1}')" = \
-         "c01f128da92ba1625dc9dc87684d6fc1b9e24f30dcef0be177718a87a0574ed2" ] ; then
-        rm -f /etc/wazo-calld/conf.d/50-engine-api.yml
-    fi
-    if [ "$(sha256sum /etc/xivo-amid/conf.d/50-engine-api.yml | awk '{print $1}')" = \
-         "44533554535a896b63e4102424b49ca3918c2fcac574ee352c0f73353473e8e7" ] ; then
-        rm -f /etc/xivo-amid/conf.d/50-engine-api.yml
-    fi
-    if [ "$(sha256sum /etc/wazo-confd/conf.d/50-engine-api.yml | awk '{print $1}')" = \
-         "5ba68f5026f1cf13320a177ea795fa90936e10efa0c5796af5bb7ed7f0891f9d" ] ; then
-        rm -f /etc/wazo-confd/conf.d/50-engine-api.yml
-    fi
-    if [ "$(sha256sum /etc/xivo-dao/conf.d/50-engine-api.yml | awk '{print $1}')" = \
-         "3322ae291e16eba18014481c1982eb015090790128d73320dd0a6374ede9ed9d" ] ; then
-        rm -f /etc/xivo-dao/conf.d/50-engine-api.yml
-    fi
-    if [ "$(sha256sum /etc/xivo-confgend/conf.d/50-engine-api.yml | awk '{print $1}')" = \
-         "93ff6bcf9ad40be2f946b8e3f6059ab563d5fa4d10ad1feaf0cf3849a9bd77e6" ] ; then
-        rm -f /etc/xivo-confgend/conf.d/50-engine-api.yml
-    fi
-    if [ "$(sha256sum /etc/wazo-agid/conf.d/50-engine-api.yml | awk '{print $1}')" = \
-         "fd99652773598333630ee160e6f09ff6cfde20849291a165a278641f43eb163c" ] ; then
-        rm -f /etc/wazo-agid/conf.d/50-engine-api.yml
-    fi
-}
-
-prepare_consul_upgrade() {
-    systemctl stop consul
-    cat > /var/lib/consul/raft/peers.json <<EOF
-[{
-  "id": "$(cat /var/lib/consul/node-id)",
-  "address": "127.0.0.1:8300",
-  "non_voter": false
-}]
-EOF
-    chown consul: /var/lib/consul/raft/peers.json
 }
 
 change_sources_list() {
@@ -140,52 +81,31 @@ migrate_systemd_system_conf() {
     fi
 }
 
-is_available() {
-    apt-cache show "$1" > /dev/null 2>&1
-}
-
-find_wazo_dbms_package() {
-    if is_available wazo-dbms; then
-        echo wazo-dbms
-    else
-        echo xivo-dbms
-    fi
-}
-
 dist_upgrade() {
     differed_action pre-stop
     wazo-service stop
     wazo-service disable
     differed_action post-stop
-    remove_ansible_default_config_dropins
 
     apt-get update -qq
-    apt-get install --yes -o Dpkg::Options::="--force-confnew" xivo-dist
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" wazo-dist
 
     wazo-dist -m ${wazo_distribution}
     change_sources_list 'stretch' 'buster'
     apt-get update -qq
 
-    wazo_dbms_package=$(find_wazo_dbms_package)
-    apt-get install --yes -o Dpkg::Options::="--force-confnew" wazo-dist
-    apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends $wazo_dbms_package  # Handle PostgreSQL cluster upgrade
-    apt-get install --yes -o Dpkg::Options::="--force-confnew" systemd systemd-sysv  # Fix rabbitmq-server.service obscure bug
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends wazo-dbms  # Handle PostgreSQL cluster upgrade
     migrate_systemd_system_conf
     apt-get install --yes -o Dpkg::Options::="--force-confnew" rabbitmq-server
-    apt-mark auto systemd systemd-sysv rabbitmq-server
-    apt-mark auto $wazo_dbms_package
-    prepare_consul_upgrade
+    apt-mark auto wazo-dbms rabbitmq-server
     apt-get upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get dist-upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get autoremove --yes
 
     differed_action pre-start
     wazo-service enable
-    update-alternatives --set iptables /usr/sbin/iptables-legacy
     wazo-service restart
-    update-alternatives --set iptables /usr/sbin/iptables-nft
     differed_action post-start
-    apt-get purge --yes xivo-dist
 }
 
 display_reboot_notice() {
