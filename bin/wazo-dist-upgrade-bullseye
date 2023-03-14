@@ -31,17 +31,17 @@ wazo_version_candidate() {
 
 display_upgrade_notice() {
     cat <<-EOF
-	*****************************************************************************
-	*                                                                           *
-	*  The Debian GNU/Linux system will be upgraded from version 9 (Stretch)    *
-	*  to 10 (Buster). Hence, this upgrade will be longer than other upgrades.  *
-	*                                                                           *
-	*  Please make sure you have read the upgrade notes:                        *
-	*  http://documentation.wazo.community/en/latest/upgrade/19.13/buster.html  *
-	*                                                                           *
-	*  You must RESTART the machine after the upgrade.                          *
-	*                                                                           *
-	*****************************************************************************
+	**********************************************************************************
+	*                                                                                *
+	*  The Debian GNU/Linux system will be upgraded from version 10 (Buster)         *
+	*  to 11 (Bullseye). Hence, this upgrade will be longer than other upgrades.     *
+	*                                                                                *
+	*  Please make sure you have read the upgrade notes:                             *
+	*  https://wazo-platform.org/uc-doc/upgrade/upgrade_notes_details/23-06/bullseye *
+	*                                                                                *
+	*  You must RESTART the machine after the upgrade.                               *
+	*                                                                                *
+	**********************************************************************************
 
 EOF
 }
@@ -53,7 +53,7 @@ display_wazo_versions() {
 
 differed_action() {
     local state=$1
-    export XIVO_VERSION_INSTALLED=19.12
+    export WAZO_VERSION_INSTALLED=23.05
     shopt -qs nullglob  # avoid warning when action directory has no scripts
     for script in /usr/share/wazo-upgrade/$state.d/* ; do
 		    echo "Executing upgrade script $script..."
@@ -91,7 +91,7 @@ dist_upgrade() {
     apt-get install --yes -o Dpkg::Options::="--force-confnew" wazo-dist
 
     wazo-dist -m ${wazo_distribution}
-    change_sources_list 'stretch' 'buster'
+    change_sources_list 'buster' 'bullseye'
     apt-get update -qq
 
     apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends wazo-dbms  # Handle PostgreSQL cluster upgrade
@@ -120,7 +120,7 @@ maybe_dist_upgrade() {
     fetch_wazo_versions
     display_upgrade_notice
     display_wazo_versions
-    if ! /usr/lib/wazo-dist-upgrade/wazo-dist-upgrade-buster-check $force ; then
+    if ! /usr/lib/wazo-dist-upgrade/wazo-dist-upgrade-bullseye-check $force ; then
         return
     fi
     dist_upgrade
@@ -147,7 +147,7 @@ usage() {
 	    -d: only download packages
 	    -f: force yes
 	    -h: print usage
-	    -t: specify target distribution (default: pelican-buster)
+	    -t: specify target distribution (default: pelican-bullseye)
 	EOF
 }
 
@@ -155,29 +155,29 @@ debian_version_installed() {
     cut -d. -f1 /etc/debian_version
 }
 
-is_buster() {
-    [ $(debian_version_installed) -eq 10 ]
+is_bullseye() {
+    [ $(debian_version_installed) -eq 11 ]
 }
 
 download_packages() {
-    if is_buster; then
+    if is_bullseye; then
         return 0
     fi
 
     trap : SIGINT
     echo "deb http://mirror.wazo.community/debian/ $wazo_distribution main" > /etc/apt/sources.list.d/wazo-dist-upgrade.list
-    change_sources_list 'stretch' 'buster'
+    change_sources_list 'buster' 'bullseye'
     apt-get update -qq
 
     apt-get -y -d dist-upgrade
 
-    change_sources_list 'buster' 'stretch'
+    change_sources_list 'bullseye' 'buster'
     rm /etc/apt/sources.list.d/wazo-dist-upgrade.list
     apt-get update -qq
 }
 
 download_only=1
-wazo_distribution=pelican-buster
+wazo_distribution=pelican-bullseye
 while getopts :dfht: opt
 do
     case ${opt} in
