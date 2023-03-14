@@ -10,12 +10,12 @@ fetch_wazo_versions() {
     echo "Fetching Wazo versions..."
     apt-get update -qq
     trap : SIGINT
-    cp /etc/apt/sources.list.d/wazo-dist.list{,.bak}
-    change_sources_list_wazo ${wazo_distribution}
+    cp /etc/apt/sources.list.d/${wazo_sources_list}{,.bak}
+    change_sources_list_wazo ${wazo_repository} ${wazo_distribution}
     apt-get update -qq
     wazo_version_installed=$(wazo_version_installed)
     wazo_version_candidate=$(wazo_version_candidate)
-    mv /etc/apt/sources.list.d/wazo-dist.list{.bak,}
+    mv /etc/apt/sources.list.d/${wazo_sources_list}{.bak,}
     trap - SIGINT
     apt-get update -qq
 }
@@ -62,10 +62,11 @@ differed_action() {
 }
 
 change_sources_list_wazo() {
-    distrib=$1
-    cat >> /etc/apt/sources.list.d/wazo-dist.list <<-EOF
-    deb http://mirror.wazo.community/debian/ $distrib main
-    # deb-src http://mirror.wazo.community/debian/ $distrib main
+    repo=$1
+    distrib=$2
+    cat >> /etc/apt/sources.list.d/${wazo_sources_list} <<-EOF
+    deb ${repo} $distrib main
+    # deb-src ${repo} $distrib main
 EOF
 }
 
@@ -112,7 +113,7 @@ dist_upgrade() {
     wazo-service disable
     differed_action post-stop
 
-    change_sources_list_wazo ${wazo_distribution}
+    change_sources_list_wazo ${wazo_repository} ${wazo_distribution}
     change_sources_list 'buster' 'bullseye'
     apt-get update -qq
 
@@ -192,7 +193,7 @@ download_packages() {
     fi
 
     trap : SIGINT
-    echo "deb http://mirror.wazo.community/debian/ $wazo_distribution main" > /etc/apt/sources.list.d/wazo-dist-upgrade.list
+    echo "deb $wazo_repository $wazo_distribution main" > /etc/apt/sources.list.d/wazo-dist-upgrade.list
     change_sources_list 'buster' 'bullseye'
     apt-get update -qq
 
@@ -205,7 +206,9 @@ download_packages() {
 
 download_only=1
 wazo_distribution=pelican-bullseye
-while getopts :dfht: opt
+wazo_repository=http://mirror.wazo.community/debian
+wazo_sources_list=wazo-dist.list
+while getopts :dfhtrs: opt
 do
     case ${opt} in
         d) download_only=0;;
@@ -215,6 +218,8 @@ do
             exit 0
         ;;
         t) wazo_distribution=${OPTARG};;
+        r) wazo_repository=${OPTARG};;
+        s) wazo_sources_list=${OPTARG};;
         '?')
             echo "${0} : option ${OPTARG} is not valid" >&2
             usage
