@@ -72,6 +72,11 @@ EOF
 change_sources_list() {
     from=$1
     to=$2
+    if [ ${from} == 'buster' ] && [ ${to} == 'bullseye' ]; then
+        sed -i "s|debian-security buster/updates|debian-security bullseye-security|" /etc/apt/sources.list
+    elif [ ${from} == 'bullseye' ] && [ ${to} == 'buster' ]; then
+        sed -i "s|debian-security bullseye-security|debian-security buster/updates|" /etc/apt/sources.list
+    fi
     sed -i "s/$from/$to/" /etc/apt/sources.list
 }
 
