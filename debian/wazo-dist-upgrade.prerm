@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+# NOTE(fblackburn): cannot use dh_installalternatives until we support buster (we need debhelper 13)
+# Automatically added by dh_installalternatives/13.3.4
+if [ "$1" = "remove" ]; then
+	update-alternatives --remove wazo-dist-upgrade-bullseye /usr/bin/wazo-dist-upgrade-bullseye-ce
+fi
+# End automatically added section
