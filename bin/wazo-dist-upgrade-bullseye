@@ -9,10 +9,9 @@ export APT_LISTCHANGES_FRONTEND=none
 fetch_wazo_versions() {
     echo "Fetching Wazo versions..."
     apt-get update -qq
-    apt-get install -qq --yes -o Dpkg::Options::="--force-confnew" wazo-dist
     trap : SIGINT
     cp /etc/apt/sources.list.d/wazo-dist.list{,.bak}
-    wazo-dist -m ${wazo_distribution}
+    change_sources_list_wazo ${wazo_distribution}
     apt-get update -qq
     wazo_version_installed=$(wazo_version_installed)
     wazo_version_candidate=$(wazo_version_candidate)
@@ -62,6 +61,14 @@ differed_action() {
     shopt -qu nullglob
 }
 
+change_sources_list_wazo() {
+    distrib=$1
+    cat >> /etc/apt/sources.list.d/wazo-dist.list <<-EOF
+    deb http://mirror.wazo.community/debian/ $distrib main
+    # deb-src http://mirror.wazo.community/debian/ $distrib main
+EOF
+}
+
 change_sources_list() {
     from=$1
     to=$2
@@ -87,10 +94,7 @@ dist_upgrade() {
     wazo-service disable
     differed_action post-stop
 
-    apt-get update -qq
-    apt-get install --yes -o Dpkg::Options::="--force-confnew" wazo-dist
-
-    wazo-dist -m ${wazo_distribution}
+    change_sources_list_wazo ${wazo_distribution}
     change_sources_list 'buster' 'bullseye'
     apt-get update -qq
 
