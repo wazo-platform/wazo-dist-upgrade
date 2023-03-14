@@ -93,6 +93,19 @@ migrate_systemd_system_conf() {
     fi
 }
 
+is_package_installed() {
+    [ "$(dpkg-query -W -f '${Status}' "$1" 2>/dev/null)" = 'install ok installed' ]
+}
+
+upgrade_package() {
+    package="${1}"
+    auto_installed="$(apt-mark showauto ${package} 2>/dev/null)"
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends ${package}
+    if [ "${auto_installed}" = "${package}" ]; then
+        apt-mark auto "${package}"
+    fi
+}
+
 dist_upgrade() {
     differed_action pre-stop
     wazo-service stop
@@ -102,6 +115,11 @@ dist_upgrade() {
     change_sources_list_wazo ${wazo_distribution}
     change_sources_list 'buster' 'bullseye'
     apt-get update -qq
+
+    # Avoid specific Bullseye downtime
+    if is_package_installed openssh-server; then
+        upgrade_package openssh-server
+    fi
 
     apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends wazo-dbms  # Handle PostgreSQL cluster upgrade
     migrate_systemd_system_conf
