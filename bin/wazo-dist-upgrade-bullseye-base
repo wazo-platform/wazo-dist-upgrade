@@ -171,11 +171,14 @@ append_log()
 
 usage() {
     cat <<-EOF
-	usage: wazo-dist-upgrade [-d] [-f] [-h]
+	usage: wazo-dist-upgrade [-d] [-f] [-h] -r <repository> -t <distribution> -s <filename> -m <link>
 	    -d: only download packages
 	    -f: force yes
 	    -h: print usage
-	    -t: specify target distribution (default: pelican-bullseye)
+	    -t: specify target distribution
+	    -r: specify target repository
+	    -s: specify sources.list filename
+	    -m: specify documentation link
 	EOF
 }
 
@@ -205,11 +208,11 @@ download_packages() {
 }
 
 download_only=1
-wazo_distribution=pelican-bullseye
-wazo_repository=http://mirror.wazo.community/debian
-wazo_sources_list=wazo-dist.list
-wazo_documentation=https://wazo-platform.org/uc-doc/upgrade/upgrade_notes_details/23-06/bullseye
-while getopts :dfhtrsm: opt
+unset wazo_distribution
+unset wazo_repository
+unset wazo_sources_list
+unset wazo_documentation
+while getopts :dfht:r:s:m: opt
 do
     case ${opt} in
         d) download_only=0;;
@@ -229,6 +232,12 @@ do
         ;;
     esac
 done
+
+if [ -z "${wazo_distribution}" ] || [ -z "${wazo_repository}" ] || [ -z "${wazo_sources_list}" ] || [ -z "${wazo_documentation}" ]; then
+    echo 'Missing required parameters'
+    usage
+    exit -1
+fi
 
 if [ $download_only -eq 0 ]; then
     append_log $LOGFILE started
