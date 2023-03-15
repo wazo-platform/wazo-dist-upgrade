@@ -36,7 +36,7 @@ display_upgrade_notice() {
 	*  to 11 (Bullseye). Hence, this upgrade will be longer than other upgrades.     *
 	*                                                                                *
 	*  Please make sure you have read the upgrade notes:                             *
-	*  https://wazo-platform.org/uc-doc/upgrade/upgrade_notes_details/23-06/bullseye *
+	*  ${wazo_documentation} *
 	*                                                                                *
 	*  You must RESTART the machine after the upgrade.                               *
 	*                                                                                *
@@ -208,7 +208,8 @@ download_only=1
 wazo_distribution=pelican-bullseye
 wazo_repository=http://mirror.wazo.community/debian
 wazo_sources_list=wazo-dist.list
-while getopts :dfhtrs: opt
+wazo_documentation=https://wazo-platform.org/uc-doc/upgrade/upgrade_notes_details/23-06/bullseye
+while getopts :dfhtrsm: opt
 do
     case ${opt} in
         d) download_only=0;;
@@ -220,6 +221,7 @@ do
         t) wazo_distribution=${OPTARG};;
         r) wazo_repository=${OPTARG};;
         s) wazo_sources_list=${OPTARG};;
+        m) wazo_documentation=${OPTARG};;
         '?')
             echo "${0} : option ${OPTARG} is not valid" >&2
             usage
