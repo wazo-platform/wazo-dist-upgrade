@@ -24,3 +24,7 @@ Debian distribution utility for Wazo
 - `wazo-dist-upgrade`: Wrapper to execute upgrade script according the Debian version
 - `wazo-dist-upgrade-<debian>`: Specific upgrade procedure for a Debian version
 - `wazo-dist-upgrade-<debian>-check`: Do various check before upgrade (wazo, debian, etc..)
+
+- `wazo-dist-upgrade-bullseye`: Symlink to provide alternatives upgrade according the Wazo edition
+- `wazo-dist-upgrade-bullseye-ce`: Community Edition wrapper
+- `wazo-dist-upgrade-bullseye-base`: Specific upgrade procedure for a Debian version
