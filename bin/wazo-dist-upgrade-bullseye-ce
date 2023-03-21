@@ -39,7 +39,7 @@ wazo_sources_list=wazo-dist.list
 wazo_documentation=https://wazo-platform.org/uc-doc/upgrade/upgrade_notes_details/23-06/bullseye
 
 echo 'Wazo Distribution Upgrade Bullseye Community Edition'
-wazo-dist-upgrade-bullseye-base \
+/usr/lib/wazo-dist-upgrade/wazo-dist-upgrade-bullseye-base \
     -t ${wazo_distribution} \
     -r ${wazo_repository} \
     -s ${wazo_sources_list} \
