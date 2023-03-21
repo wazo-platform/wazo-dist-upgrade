@@ -11,7 +11,7 @@ fetch_wazo_versions() {
     apt-get update -qq
     trap : SIGINT
     cp /etc/apt/sources.list.d/${wazo_sources_list}{,.bak}
-    change_sources_list_wazo ${wazo_repository} ${wazo_distribution}
+    change_sources_list_wazo ${wazo_repository} ${wazo_distribution}
     apt-get update -qq
     wazo_version_installed=$(wazo_version_installed)
     wazo_version_candidate=$(wazo_version_candidate)
@@ -64,9 +64,9 @@ differed_action() {
 change_sources_list_wazo() {
     repo=$1
     distrib=$2
-    cat >> /etc/apt/sources.list.d/${wazo_sources_list} <<-EOF
-    deb ${repo} $distrib main
-    # deb-src ${repo} $distrib main
+    cat > /etc/apt/sources.list.d/${wazo_sources_list} <<-EOF
+deb ${repo} ${distrib} main
+# deb-src ${repo} ${distrib} main
 EOF
 }
 
@@ -113,7 +113,7 @@ dist_upgrade() {
     wazo-service disable
     differed_action post-stop
 
-    change_sources_list_wazo ${wazo_repository} ${wazo_distribution}
+    change_sources_list_wazo ${wazo_repository} ${wazo_distribution}
     change_sources_list 'buster' 'bullseye'
     apt-get update -qq
 
