@@ -16,8 +16,7 @@ Debian distribution utility for Wazo
   Reason: the `wazo-dist-upgrade` package must not change version when running
   `wazo-dist-upgrade`, because the running dist-upgrade script will be replaced.
 
-- `/usr/bin/wazo-dist-upgrade` must be Python/Bash compatible with Jessie,
-  Stretch and Buster
+- `/usr/bin/wazo-dist-upgrade` must be Python/Bash compatible with Stretch, Buster, Bullseye
 
 ## Content
 
