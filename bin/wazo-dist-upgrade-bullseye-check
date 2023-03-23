@@ -27,7 +27,7 @@ class WizardNotConfigured(WazoDistUpgradeException):
 
 class ConfdError(WazoDistUpgradeException):
 
-    _message = 'xivo-confd is not reachable. You should check /var/log/xivo-confd.log for errors.'
+    _message = 'wazo-confd is not reachable. You should check /var/log/wazo-confd.log for errors.'
 
     def __init__(self):
         super().__init__(self._message)
@@ -63,7 +63,7 @@ def main():
     args = parse_args()
     try:
         check_wazo_version()
-        check_wizard_is_run()
+        check_wizard_has_run()
         check_running_kernel_is_up_to_date()
         if not args.force:
             confirm_upgrade()
@@ -102,10 +102,10 @@ def installed_wazo_version():
         return str(version_file.read()).strip()
 
 
-def check_wizard_is_run():
+def check_wizard_has_run():
     port = os.environ.get('WAZO_CONFD_PORT', '9486')
     try:
-        r = requests.get(f'https://localhost:{port}/1.1/wizard', verify=False)
+        r = requests.get(f'http://localhost:{port}/1.1/wizard')
     except requests.RequestException:
         raise ConfdError()
 

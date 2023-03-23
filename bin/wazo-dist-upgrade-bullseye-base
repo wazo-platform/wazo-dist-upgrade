@@ -33,7 +33,7 @@ display_upgrade_notice() {
 	**********************************************************************************
 	*                                                                                *
 	*  The Debian GNU/Linux system will be upgraded from version 10 (Buster)         *
-	*  to 11 (Bullseye). Hence, this upgrade will be longer than other upgrades.     *
+	*  to 11 (Bullseye). Therefore, this upgrade will be longer than other upgrades. *
 	*                                                                                *
 	*  Please make sure you have read the upgrade notes:                             *
 	*  ${wazo_documentation} *
