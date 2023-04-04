@@ -1,0 +1,6 @@
+bin/wazo-dist-upgrade usr/bin/
+bin/wazo-dist-upgrade-buster-check usr/lib/wazo-dist-upgrade/
+bin/wazo-dist-upgrade-buster usr/bin/
+bin/wazo-dist-upgrade-bullseye-base usr/lib/wazo-dist-upgrade/
+bin/wazo-dist-upgrade-bullseye-ce usr/bin
+bin/wazo-dist-upgrade-bullseye-check usr/lib/wazo-dist-upgrade/

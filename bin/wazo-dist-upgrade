@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2019-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 debian_version_installed() {
@@ -10,8 +10,15 @@ is_stretch() {
     [ $(debian_version_installed) -eq 9 ]
 }
 
+is_buster() {
+    [ $(debian_version_installed) -eq 10 ]
+}
+
 if is_stretch; then
     wazo-dist-upgrade-buster $@
+# NOTE(fblackburn) Uncomment when bullseye will be released
+# elif is_buster; then
+#     wazo-dist-upgrade-bullseye $@
 else
     echo "Debian version '$(debian_version_installed)' is not supported"
 fi

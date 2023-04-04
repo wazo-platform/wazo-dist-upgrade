@@ -1,7 +1,7 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/ 
-Upstream-Name: wazo-service
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: wazo-dist-upgrade
 Source: https://github.com/wazo-platform/wazo-dist-upgrade
 
 Files: *
-Copyright: 2019 The Wazo Authors
+Copyright: 2019-2023 The Wazo Authors
 License: GPL-3.0+

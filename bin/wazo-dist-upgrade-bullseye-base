@@ -1,0 +1,250 @@
+#!/bin/bash
+# Copyright 2023 The Wazo Authors  (see the AUTHORS file)
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+LOGFILE="/var/log/wazo-upgrade.log"
+export DEBIAN_FRONTEND=noninteractive
+export APT_LISTCHANGES_FRONTEND=none
+
+fetch_wazo_versions() {
+    echo "Fetching Wazo versions..."
+    apt-get update -qq
+    trap : SIGINT
+    cp /etc/apt/sources.list.d/${wazo_sources_list}{,.bak}
+    change_sources_list_wazo ${wazo_repository} ${wazo_distribution}
+    apt-get update -qq
+    wazo_version_installed=$(wazo_version_installed)
+    wazo_version_candidate=$(wazo_version_candidate)
+    mv /etc/apt/sources.list.d/${wazo_sources_list}{.bak,}
+    trap - SIGINT
+    apt-get update -qq
+}
+
+wazo_version_installed() {
+    echo "$(LANG='C' apt-cache policy wazo-platform | grep Installed | grep -oE '[0-9]{2}\.[0-9]+(\.[0-9]+)?' | head -n1)"
+}
+
+wazo_version_candidate() {
+    echo "$(LANG='C' apt-cache policy wazo-platform | grep Candidate | grep -oE '[0-9]{2}\.[0-9]+(\.[0-9]+)?' | head -n1)"
+}
+
+display_upgrade_notice() {
+    cat <<-EOF
+	**********************************************************************************
+	*                                                                                *
+	*  The Debian GNU/Linux system will be upgraded from version 10 (Buster)         *
+	*  to 11 (Bullseye). Therefore, this upgrade will be longer than other upgrades. *
+	*                                                                                *
+	*  Please make sure you have read the upgrade notes:                             *
+	*  ${wazo_documentation} *
+	*                                                                                *
+	*  You must RESTART the machine after the upgrade.                               *
+	*                                                                                *
+	**********************************************************************************
+
+EOF
+}
+
+display_wazo_versions() {
+    echo "Currently installed Wazo version: ${wazo_version_installed}"
+    echo "Proposed update:                  ${wazo_version_candidate}"
+}
+
+differed_action() {
+    local state=$1
+    export WAZO_VERSION_INSTALLED=23.05
+    shopt -qs nullglob  # avoid warning when action directory has no scripts
+    for script in /usr/share/wazo-upgrade/$state.d/* ; do
+		    echo "Executing upgrade script $script..."
+        $script
+    done
+    shopt -qu nullglob
+}
+
+change_sources_list_wazo() {
+    repo=$1
+    distrib=$2
+    cat > /etc/apt/sources.list.d/${wazo_sources_list} <<-EOF
+deb ${repo} ${distrib} main
+# deb-src ${repo} ${distrib} main
+EOF
+}
+
+change_sources_list() {
+    from=$1
+    to=$2
+    if [ ${from} == 'buster' ] && [ ${to} == 'bullseye' ]; then
+        sed -i "s|debian-security buster/updates|debian-security bullseye-security|" /etc/apt/sources.list
+    elif [ ${from} == 'bullseye' ] && [ ${to} == 'buster' ]; then
+        sed -i "s|debian-security bullseye-security|debian-security buster/updates|" /etc/apt/sources.list
+    fi
+    sed -i "s/$from/$to/" /etc/apt/sources.list
+}
+
+migrate_systemd_system_conf() {
+    if [ ! -f /etc/systemd/system.conf.dpkg-old ] ; then
+        return 0
+    fi
+
+    old_default_environment=$(grep ^DefaultEnvironment /etc/systemd/system.conf.dpkg-old)
+    sed -i "s/^#DefaultEnvironment=.*/${old_default_environment}/" /etc/systemd/system.conf
+
+    if diff <(grep -v '^#' /etc/systemd/system.conf) <(grep -v '^#' /etc/systemd/system.conf.dpkg-old) ; then
+        rm /etc/systemd/system.conf.dpkg-old
+    fi
+}
+
+is_package_installed() {
+    [ "$(dpkg-query -W -f '${Status}' "$1" 2>/dev/null)" = 'install ok installed' ]
+}
+
+upgrade_package() {
+    package="${1}"
+    auto_installed="$(apt-mark showauto ${package} 2>/dev/null)"
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends ${package}
+    if [ "${auto_installed}" = "${package}" ]; then
+        apt-mark auto "${package}"
+    fi
+}
+
+dist_upgrade() {
+    differed_action pre-stop
+    wazo-service stop
+    wazo-service disable
+    differed_action post-stop
+
+    change_sources_list_wazo ${wazo_repository} ${wazo_distribution}
+    change_sources_list 'buster' 'bullseye'
+    apt-get update -qq
+
+    # Avoid specific Bullseye downtime
+    if is_package_installed openssh-server; then
+        upgrade_package openssh-server
+    fi
+
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends wazo-dbms  # Handle PostgreSQL cluster upgrade
+    migrate_systemd_system_conf
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" rabbitmq-server
+    apt-mark auto wazo-dbms rabbitmq-server
+    apt-get upgrade --yes -o Dpkg::Options::="--force-confnew"
+    apt-get dist-upgrade --yes -o Dpkg::Options::="--force-confnew"
+    apt-get autoremove --yes
+
+    differed_action pre-start
+    wazo-service enable
+    wazo-service restart
+    differed_action post-start
+}
+
+display_reboot_notice() {
+    cat <<-EOF
+
+	* You must RESTART the machine before using Wazo again.
+
+	EOF
+}
+
+maybe_dist_upgrade() {
+    fetch_wazo_versions
+    display_upgrade_notice
+    display_wazo_versions
+    if ! /usr/lib/wazo-dist-upgrade/wazo-dist-upgrade-bullseye-check $force ; then
+        return
+    fi
+    dist_upgrade
+    wazo-check-conffiles
+    display_reboot_notice
+}
+
+append_log()
+{
+    logfile=$1
+    action=$2
+    cat >> $logfile <<-EOF
+
+	================================================
+	wazo-dist-upgrade ${action} at $(date +%Y-%m-%d_%H:%M:%S)
+	================================================
+
+	EOF
+}
+
+usage() {
+    cat <<-EOF
+	usage: wazo-dist-upgrade [-d] [-f] [-h] -r <repository> -t <distribution> -s <filename> -m <link>
+	    -d: only download packages
+	    -f: force yes
+	    -h: print usage
+	    -t: specify target distribution
+	    -r: specify target repository
+	    -s: specify sources.list filename
+	    -m: specify documentation link
+	EOF
+}
+
+debian_version_installed() {
+    cut -d. -f1 /etc/debian_version
+}
+
+is_bullseye() {
+    [ $(debian_version_installed) -eq 11 ]
+}
+
+download_packages() {
+    if is_bullseye; then
+        return 0
+    fi
+
+    trap : SIGINT
+    echo "deb $wazo_repository $wazo_distribution main" > /etc/apt/sources.list.d/wazo-dist-upgrade.list
+    change_sources_list 'buster' 'bullseye'
+    apt-get update -qq
+
+    apt-get -y -d dist-upgrade
+
+    change_sources_list 'bullseye' 'buster'
+    rm /etc/apt/sources.list.d/wazo-dist-upgrade.list
+    apt-get update -qq
+}
+
+download_only=1
+unset wazo_distribution
+unset wazo_repository
+unset wazo_sources_list
+unset wazo_documentation
+while getopts :dfht:r:s:m: opt
+do
+    case ${opt} in
+        d) download_only=0;;
+        f) force=-f;;
+        h)
+            usage
+            exit 0
+        ;;
+        t) wazo_distribution=${OPTARG};;
+        r) wazo_repository=${OPTARG};;
+        s) wazo_sources_list=${OPTARG};;
+        m) wazo_documentation=${OPTARG};;
+        '?')
+            echo "${0} : option ${OPTARG} is not valid" >&2
+            usage
+            exit -1
+        ;;
+    esac
+done
+
+if [ -z "${wazo_distribution}" ] || [ -z "${wazo_repository}" ] || [ -z "${wazo_sources_list}" ] || [ -z "${wazo_documentation}" ]; then
+    echo 'Missing required parameters'
+    usage
+    exit -1
+fi
+
+if [ $download_only -eq 0 ]; then
+    append_log $LOGFILE started
+    download_packages |& tee -a $LOGFILE
+    append_log $LOGFILE stopped
+else
+    append_log $LOGFILE started
+    maybe_dist_upgrade |& tee -a $LOGFILE
+    append_log $LOGFILE stopped
+fi

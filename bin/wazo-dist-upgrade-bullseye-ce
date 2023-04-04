@@ -1,0 +1,48 @@
+#!/bin/bash
+set -e
+set -u  # fail if variable is undefined
+set -o pipefail  # fail if command before pipe fails
+
+usage() {
+    cat <<-EOF
+	usage: wazo-dist-upgrade [-d] [-f] [-h] [-t <distribution>]
+	    -d: only download packages
+	    -f: force yes
+	    -h: print usage
+	    -t: specify target distribution (default: pelican-bullseye)
+	EOF
+}
+
+wazo_distribution=pelican-bullseye
+download_only=''
+force=''
+while getopts :dfht: opt
+do
+    case ${opt} in
+        d) download_only=-d;;
+        f) force=-f;;
+        h)
+            usage
+            exit 0
+        ;;
+        t) wazo_distribution=${OPTARG};;
+        '?')
+            echo "${0} : option ${OPTARG} is not valid" >&2
+            usage
+            exit -1
+        ;;
+    esac
+done
+
+wazo_repository=http://mirror.wazo.community/debian
+wazo_sources_list=wazo-dist.list
+wazo_documentation=https://wazo-platform.org/uc-doc/upgrade/upgrade_notes_details/23-06/bullseye
+
+echo 'Wazo Distribution Upgrade Bullseye Community Edition'
+/usr/lib/wazo-dist-upgrade/wazo-dist-upgrade-bullseye-base \
+    -t ${wazo_distribution} \
+    -r ${wazo_repository} \
+    -s ${wazo_sources_list} \
+    -m ${wazo_documentation} \
+    ${download_only} \
+    ${force}
