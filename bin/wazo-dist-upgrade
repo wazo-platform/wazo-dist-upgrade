@@ -16,9 +16,8 @@ is_buster() {
 
 if is_stretch; then
     wazo-dist-upgrade-buster $@
-# NOTE(fblackburn) Uncomment when bullseye will be released
-# elif is_buster; then
-#     wazo-dist-upgrade-bullseye $@
+elif is_buster; then
+    wazo-dist-upgrade-bullseye $@
 else
     echo "Debian version '$(debian_version_installed)' is not supported"
 fi
