@@ -123,9 +123,13 @@ dist_upgrade() {
     fi
 
     apt-get install --yes -o Dpkg::Options::="--force-confnew" --no-install-recommends wazo-dbms  # Handle PostgreSQL cluster upgrade
-    migrate_systemd_system_conf
     apt-get install --yes -o Dpkg::Options::="--force-confnew" rabbitmq-server
     apt-mark auto wazo-dbms rabbitmq-server
+
+    apt-get install --yes -o Dpkg::Options::="--force-confnew" systemd systemd-sysv
+    migrate_systemd_system_conf
+    apt-mark auto systemd systemd-sysv
+
     apt-get upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get dist-upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get autoremove --yes
