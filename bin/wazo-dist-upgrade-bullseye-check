@@ -5,6 +5,8 @@
 import argparse
 import os
 import platform
+import subprocess
+
 import requests
 import sys
 import urllib3
@@ -65,6 +67,7 @@ def main():
         check_wazo_version()
         check_wizard_has_run()
         check_running_kernel_is_up_to_date()
+        check_gnome_not_installed()
         if not args.force:
             confirm_upgrade()
     except WazoDistUpgradeException as e:
@@ -114,6 +117,15 @@ def check_wizard_has_run():
             raise WizardNotConfigured()
     except (ValueError, KeyError):
         raise ConfdError()
+
+
+def check_gnome_not_installed():
+    command = ['dpkg-query', '--show', '--showformat', "${Status}", 'gnome-core']
+    output = subprocess.run(command, capture_output=True, text=True)
+    if output.returncode == 0 and output.stdout == "install ok installed":
+        raise WazoDistUpgradeException(
+            "Upgrading a distribution with gnome installed is not supported."
+        )
 
 
 def confirm_upgrade():
