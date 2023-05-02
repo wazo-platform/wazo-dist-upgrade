@@ -136,9 +136,6 @@ deb-src http://security.debian.org/debian-security buster main
 
 deb http://deb.debian.org/debian buster-updates main
 deb-src http://deb.debian.org/debian buster-updates main
-
-deb http://deb.debian.org/debian buster-backports main
-deb-src http://deb.debian.org/debian buster-backports main
 EOF
     elif [ ${from} == 'buster' ] && [ ${to} == 'stretch' ]; then
         sed -i "/\(deb\.debian\.org.*) buster.*/d" /etc/apt/sources.list
@@ -146,9 +143,6 @@ EOF
         cat >> /etc/apt/sources.list <<EOF
 deb http://archive.debian.org/debian/ stretch main
 deb-src http://archive.debian.org/debian/ stretch main
-
-deb http://archive.debian.org/debian/ stretch-backports main
-deb-src http://archive.debian.org/debian/ stretch-backports main
 EOF
     fi
     sed -i "s/$from/$to/" /etc/apt/sources.list
