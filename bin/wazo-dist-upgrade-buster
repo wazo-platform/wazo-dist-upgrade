@@ -144,11 +144,11 @@ EOF
         sed -i "/\(deb\.debian\.org.*) buster.*/d" /etc/apt/sources.list
         sed -i "/\(security\.debian\.org.*\) buster.*/d" /etc/apt/sources.list
         cat >> /etc/apt/sources.list <<EOF
-deb http://archive.debian.org/debian-archive/debian/ stretch main
-deb-src http://archive.debian.org/debian-archive/debian/ stretch main
+deb http://archive.debian.org/debian/ stretch main
+deb-src http://archive.debian.org/debian/ stretch main
 
-deb http://archive.debian.org/debian-archive/debian/ stretch-backports main
-deb-src http://archive.debian.org/debian-archive/debian/ stretch-backports main
+deb http://archive.debian.org/debian/ stretch-backports main
+deb-src http://archive.debian.org/debian/ stretch-backports main
 EOF
     fi
     sed -i "s/$from/$to/" /etc/apt/sources.list
