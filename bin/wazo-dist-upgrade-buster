@@ -131,14 +131,14 @@ change_sources_list() {
 deb http://deb.debian.org/debian buster main
 deb-src http://deb.debian.org/debian buster main
 
-deb http://security.debian.org/debian-security buster main
-deb-src http://security.debian.org/debian-security buster main
+deb http://security.debian.org/debian-security buster/updates main
+deb-src http://security.debian.org/debian-security buster/updates main
 
 deb http://deb.debian.org/debian buster-updates main
 deb-src http://deb.debian.org/debian buster-updates main
 EOF
     elif [ ${from} == 'buster' ] && [ ${to} == 'stretch' ]; then
-        sed -i "/\(deb\.debian\.org.*) buster.*/d" /etc/apt/sources.list
+        sed -i "/\(deb\.debian\.org.*\) buster.*/d" /etc/apt/sources.list
         sed -i "/\(security\.debian\.org.*\) buster.*/d" /etc/apt/sources.list
         cat >> /etc/apt/sources.list <<EOF
 deb http://archive.debian.org/debian/ stretch main
