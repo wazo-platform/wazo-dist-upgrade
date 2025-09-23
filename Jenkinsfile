@@ -24,9 +24,10 @@ pipeline {
       steps {
         sh '''
         REPREPRO=mirror.wazo.community
-        ssh \$REPREPRO reprepro-main -v copysrc wazo-dev-buster wazo-dev-bullseye wazo-dist-upgrade
-        ssh \$REPREPRO reprepro-main -v copysrc wazo-dev-stretch wazo-dev-bullseye wazo-dist-upgrade
-        ssh \$REPREPRO reprepro-main -v copysrc wazo-rc wazo-dev-bullseye wazo-dist-upgrade
+        ssh \$REPREPRO reprepro-main -v copysrc wazo-dev-bullseye wazo-dev-bookworm wazo-dist-upgrade
+        ssh \$REPREPRO reprepro-main -v copysrc wazo-dev-buster wazo-dev-bookworm wazo-dist-upgrade
+        ssh \$REPREPRO reprepro-main -v copysrc wazo-dev-stretch wazo-dev-bookworm wazo-dist-upgrade
+        ssh \$REPREPRO reprepro-main -v copysrc wazo-rc wazo-dev-bookworm wazo-dist-upgrade
         '''
       }
     }
