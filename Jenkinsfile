@@ -16,18 +16,16 @@ pipeline {
     stage('Debian build and deploy') {
       steps {
         build job: 'build-package-no-arch', parameters: [
-          string(name: 'PACKAGE', value: "${JOB_NAME}"),
+          string(name: 'PACKAGE', value: "wazo-dist-upgrade"),
+          string(name: "BRANCH", value: "bookworm"),
+          string(name: "DISTRIBUTION", value: "wazo-dev-bookworm"),
         ]
       }
     }
     stage ('Sync package') {
       steps {
         sh '''
-        REPREPRO=mirror.wazo.community
-        ssh \$REPREPRO reprepro-main -v copysrc wazo-dev-bullseye wazo-dev-bookworm wazo-dist-upgrade
-        ssh \$REPREPRO reprepro-main -v copysrc wazo-dev-buster wazo-dev-bookworm wazo-dist-upgrade
-        ssh \$REPREPRO reprepro-main -v copysrc wazo-dev-stretch wazo-dev-bookworm wazo-dist-upgrade
-        ssh \$REPREPRO reprepro-main -v copysrc wazo-rc wazo-dev-bookworm wazo-dist-upgrade
+        echo 1
         '''
       }
     }
