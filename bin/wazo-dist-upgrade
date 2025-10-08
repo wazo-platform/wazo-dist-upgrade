@@ -15,7 +15,7 @@ is_buster() {
 }
 
 is_bullseye() {
-    [ $(debian_version_installed) -eq 10 ]
+    [ $(debian_version_installed) -eq 11 ]
 }
 
 if is_stretch; then
