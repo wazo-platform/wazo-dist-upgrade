@@ -4,5 +4,6 @@ set -e
 # Automatically added by dh_installalternatives/13.3.4
 if [ "$1" = "remove" ]; then
 	update-alternatives --remove wazo-dist-upgrade-bullseye /usr/bin/wazo-dist-upgrade-bullseye-ce
+	update-alternatives --remove wazo-dist-upgrade-bookworm /usr/bin/wazo-dist-upgrade-bookworm-ce
 fi
 # End automatically added section
