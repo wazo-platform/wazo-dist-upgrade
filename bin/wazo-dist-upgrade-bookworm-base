@@ -111,6 +111,9 @@ dist_upgrade() {
     migrate_systemd_system_conf
     apt-mark auto systemd systemd-sysv
 
+    # Prevent conflicts with NTP dependency used by wazo-platform
+    apt-get purge --yes systemd-timesyncd
+
     apt-get upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get dist-upgrade --yes -o Dpkg::Options::="--force-confnew"
     apt-get autoremove --yes
