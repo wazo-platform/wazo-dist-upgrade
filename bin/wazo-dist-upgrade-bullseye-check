@@ -6,11 +6,11 @@ import argparse
 import os
 import platform
 import subprocess
+import sys
 
 import requests
-import sys
 import urllib3
-from distutils.version import LooseVersion
+from looseversion import LooseVersion
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -50,7 +50,11 @@ class WrongKernelVersion(WazoDistUpgradeException):
   Kernel running: {running_version}"""
 
     def __init__(self, minimum_version, running_version):
-        super().__init__(self._message.format(minimum_version=minimum_version, running_version=running_version))
+        super().__init__(
+            self._message.format(
+                minimum_version=minimum_version, running_version=running_version
+            )
+        )
 
 
 class UpgradeAborted(WazoDistUpgradeException):
