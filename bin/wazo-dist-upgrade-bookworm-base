@@ -73,6 +73,27 @@ EOF
 change_sources_list() {
     from=$1
     to=$2
+    if [ ${from} == 'bullseye' ] && [ ${to} == 'bookworm' ]; then
+        sed -i "/\(security.*\) bullseye.*/d" /etc/apt/sources.list
+        sed -i "/\(archive.*\) bullseye.*/d" /etc/apt/sources.list
+        cat >> /etc/apt/sources.list <<EOF
+deb http://deb.debian.org/debian bookworm main
+deb-src http://deb.debian.org/debian bookworm main
+
+deb http://security.debian.org/debian-security bookworm-security main
+deb-src http://security.debian.org/debian-security bookworm-security main
+
+deb http://deb.debian.org/debian bookworm-updates main
+deb-src http://deb.debian.org/debian bookworm-updates main
+EOF
+    elif [ ${from} == 'bookworm' ] && [ ${to} == 'bullseye' ]; then
+        sed -i "/\(deb\.debian\.org.*\) bookworm.*/d" /etc/apt/sources.list
+        sed -i "/\(security\.debian\.org.*\) bookworm.*/d" /etc/apt/sources.list
+        cat >> /etc/apt/sources.list <<EOF
+deb http://archive.debian.org/debian/ bullseye main
+deb-src http://archive.debian.org/debian/ bullseye main
+EOF
+    fi
     sed -i "s/$from/$to/" /etc/apt/sources.list
 }
 
