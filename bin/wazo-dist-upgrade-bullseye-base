@@ -73,27 +73,10 @@ EOF
 change_sources_list() {
     from=$1
     to=$2
-    if [ ${from} == 'buster' ] && [ ${to} == 'bullseye' ]; then
-        sed -i "/\(security.*\) buster.*/d" /etc/apt/sources.list
-        sed -i "/\(archive.*\) buster.*/d" /etc/apt/sources.list
-        cat >> /etc/apt/sources.list <<EOF
-deb http://deb.debian.org/debian bullseye main
-deb-src http://deb.debian.org/debian bullseye main
 
-deb http://security.debian.org/debian-security bullseye-security main
-deb-src http://security.debian.org/debian-security bullseye-security main
+    # Safeguard to remove leftover configuration from non-archive mirror
+    sed -i "/\(security.*\) $from.*/d" /etc/apt/sources.list
 
-deb http://deb.debian.org/debian bullseye-updates main
-deb-src http://deb.debian.org/debian bullseye-updates main
-EOF
-    elif [ ${from} == 'bullseye' ] && [ ${to} == 'buster' ]; then
-        sed -i "/\(deb\.debian\.org.*\) bullseye.*/d" /etc/apt/sources.list
-        sed -i "/\(security\.debian\.org.*\) bullseye.*/d" /etc/apt/sources.list
-        cat >> /etc/apt/sources.list <<EOF
-deb http://archive.debian.org/debian/ buster main
-deb-src http://archive.debian.org/debian/ buster main
-EOF
-    fi
     sed -i "s/$from/$to/" /etc/apt/sources.list
 }
 
